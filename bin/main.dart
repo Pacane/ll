@@ -1,21 +1,24 @@
 import 'dart:io' as io;
 import 'dart:math';
 
+import 'package:collection/collection.dart';
 import 'package:io/ansi.dart';
 
 var regExp = RegExp(r'\s');
 
 Future<void> lsWrapper(List<String> arguments) async {
-  var workingDir = (arguments.firstWhere((element) => !element.startsWith('-'),
-              orElse: () => null) ??
-          io.Directory.current.absolute.path)
-      .replaceFirst('~', io.Platform.environment['HOME']);
+  var workingDir =
+      (arguments.firstWhereOrNull((element) => !element.startsWith('-')) ??
+              io.Directory.current.absolute.path)
+          .replaceFirst('~', io.Platform.environment['HOME']!);
 
   var options = arguments.where((element) => element.startsWith('-')).toList();
 
   var p = await io.Process.run(
-      'ls', ['-lh', '--group-directories-first', ...options],
-      workingDirectory: workingDir);
+    'gls',
+    ['-lh', '--group-directories-first', ...options],
+    workingDirectory: workingDir,
+  );
   var out = (p.stdout as String).split('\n').map((e) {
     if (e.startsWith('total') || e.isEmpty) {
       return e;
